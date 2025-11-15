@@ -37,8 +37,9 @@ pub fn build(b: *std.Build) void {
         .root_module = b.createModule(.{
             .root_source_file = b.path("src/root.zig"),
             .target = target,
-            .optimize = options.optimize,
+            .optimize = .Debug,
         }),
+        .test_runner = .{ .path = b.path("ZigTestRunner.zig"), .mode = .simple },
     });
     b.installArtifact(tests);
 

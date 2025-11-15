@@ -74,6 +74,9 @@ const std = @import("std");
 const time = std.time;
 const Timer = time.Timer;
 const zm = @import("zmath");
+const core = zm.core;
+const vector = zm.vector;
+const matrix = zm.matrix;
 
 var prng = std.Random.DefaultPrng.init(0);
 const random = prng.random();
@@ -83,9 +86,9 @@ noinline fn mat4MulBenchmark(allocator: std.mem.Allocator, comptime count: compt
     std.debug.print("{s:>42} - ", .{"matrix mul benchmark (AOS)"});
 
     var data0 = try std.ArrayList([16]f32).initCapacity(allocator, 64);
-    defer data0.deinit();
+    defer data0.deinit(allocator);
     var data1 = try std.ArrayList([16]f32).initCapacity(allocator, 64);
-    defer data1.deinit();
+    defer data1.deinit(allocator);
 
     var i: usize = 0;
     while (i < 64) : (i += 1) {
@@ -108,9 +111,9 @@ noinline fn mat4MulBenchmark(allocator: std.mem.Allocator, comptime count: compt
     while (i < 100) : (i += 1) {
         for (data1.items) |b| {
             for (data0.items) |a| {
-                const ma = zm.loadMat(a[0..]);
-                const mb = zm.loadMat(b[0..]);
-                const r = zm.mul(ma, mb);
+                const ma = matrix.loadMat(a[0..]);
+                const mb = matrix.loadMat(b[0..]);
+                const r = matrix.mul(ma, mb);
                 std.mem.doNotOptimizeAway(&r);
             }
         }
@@ -158,9 +161,9 @@ noinline fn mat4MulBenchmark(allocator: std.mem.Allocator, comptime count: compt
         while (i < count) : (i += 1) {
             for (data1.items) |b| {
                 for (data0.items) |a| {
-                    const ma = zm.loadMat(a[0..]);
-                    const mb = zm.loadMat(b[0..]);
-                    const r = zm.mul(ma, mb);
+                    const ma = matrix.loadMat(a[0..]);
+                    const mb = matrix.loadMat(b[0..]);
+                    const r = matrix.mul(ma, mb);
                     std.mem.doNotOptimizeAway(&r);
                 }
             }
@@ -176,9 +179,9 @@ noinline fn cross3ScaleBiasBenchmark(allocator: std.mem.Allocator, comptime coun
     std.debug.print("{s:>42} - ", .{"cross3, scale, bias benchmark (AOS)"});
 
     var data0 = try std.ArrayList([3]f32).initCapacity(allocator, 256);
-    defer data0.deinit();
+    defer data0.deinit(allocator);
     var data1 = try std.ArrayList([3]f32).initCapacity(allocator, 256);
-    defer data1.deinit();
+    defer data1.deinit(allocator);
 
     var i: usize = 0;
     while (i < 256) : (i += 1) {
@@ -191,9 +194,9 @@ noinline fn cross3ScaleBiasBenchmark(allocator: std.mem.Allocator, comptime coun
     while (i < 100) : (i += 1) {
         for (data1.items) |b| {
             for (data0.items) |a| {
-                const va = zm.loadArr3(a);
-                const vb = zm.loadArr3(b);
-                const cp = zm.f32x4s(0.01) * zm.cross3(va, vb) + zm.f32x4s(1.0);
+                const va = core.loadArr3(a);
+                const vb = core.loadArr3(b);
+                const cp = core.f32x4s(0.01) * vector.cross3(va, vb) + core.f32x4s(1.0);
                 std.mem.doNotOptimizeAway(&cp);
             }
         }
@@ -228,9 +231,9 @@ noinline fn cross3ScaleBiasBenchmark(allocator: std.mem.Allocator, comptime coun
         while (i < count) : (i += 1) {
             for (data1.items) |b| {
                 for (data0.items) |a| {
-                    const va = zm.loadArr3(a);
-                    const vb = zm.loadArr3(b);
-                    const cp = zm.f32x4s(0.01) * zm.cross3(va, vb) + zm.f32x4s(1.0);
+                    const va = core.loadArr3(a);
+                    const vb = core.loadArr3(b);
+                    const cp = core.f32x4s(0.01) * vector.cross3(va, vb) + core.f32x4s(1.0);
                     std.mem.doNotOptimizeAway(&cp);
                 }
             }
@@ -261,9 +264,9 @@ noinline fn cross3Dot3ScaleBiasBenchmark(allocator: std.mem.Allocator, comptime 
     while (i < 100) : (i += 1) {
         for (data1.items) |b| {
             for (data0.items) |a| {
-                const va = zm.loadArr3(a);
-                const vb = zm.loadArr3(b);
-                const r = (zm.dot3(va, vb) * (zm.f32x4s(0.1) * zm.cross3(va, vb) + zm.f32x4s(1.0)))[0];
+                const va = core.loadArr3(a);
+                const vb = core.loadArr3(b);
+                const r = (vector.dot3(va, vb) * (core.f32x4s(0.1) * vector.cross3(va, vb) + core.f32x4s(1.0)))[0];
                 std.mem.doNotOptimizeAway(&r);
             }
         }
@@ -299,9 +302,9 @@ noinline fn cross3Dot3ScaleBiasBenchmark(allocator: std.mem.Allocator, comptime 
         while (i < count) : (i += 1) {
             for (data1.items) |b| {
                 for (data0.items) |a| {
-                    const va = zm.loadArr3(a);
-                    const vb = zm.loadArr3(b);
-                    const r = zm.dot3(va, vb) * (zm.f32x4s(0.1) * zm.cross3(va, vb) + zm.f32x4s(1.0));
+                    const va = core.loadArr3(a);
+                    const vb = core.loadArr3(b);
+                    const r = vector.dot3(va, vb) * (core.f32x4s(0.1) * vector.cross3(va, vb) + core.f32x4s(1.0));
                     std.mem.doNotOptimizeAway(&r);
                 }
             }
@@ -332,9 +335,9 @@ noinline fn quatBenchmark(allocator: std.mem.Allocator, comptime count: comptime
     while (i < 100) : (i += 1) {
         for (data1.items) |b| {
             for (data0.items) |a| {
-                const va = zm.loadArr4(a);
-                const vb = zm.loadArr4(b);
-                const r = zm.qmul(va, vb);
+                const va = core.loadArr4(a);
+                const vb = core.loadArr4(b);
+                const r = matrix.qmul(va, vb);
                 std.mem.doNotOptimizeAway(&r);
             }
         }
@@ -370,9 +373,9 @@ noinline fn quatBenchmark(allocator: std.mem.Allocator, comptime count: comptime
         while (i < count) : (i += 1) {
             for (data1.items) |b| {
                 for (data0.items) |a| {
-                    const va = zm.loadArr4(a);
-                    const vb = zm.loadArr4(b);
-                    const r = zm.qmul(va, vb);
+                    const va = core.loadArr4(a);
+                    const vb = core.loadArr4(b);
+                    const r = matrix.qmul(va, vb);
                     std.mem.doNotOptimizeAway(&r);
                 }
             }
@@ -410,15 +413,15 @@ noinline fn waveBenchmark(allocator: std.mem.Allocator, comptime count: comptime
                     const x2 = scale * @as(f32, @floatFromInt(x_index + 2 - grid_size / 2));
                     const x3 = scale * @as(f32, @floatFromInt(x_index + 3 - grid_size / 2));
 
-                    const d0 = zm.sqrt(x0 * x0 + z * z);
-                    const d1 = zm.sqrt(x1 * x1 + z * z);
-                    const d2 = zm.sqrt(x2 * x2 + z * z);
-                    const d3 = zm.sqrt(x3 * x3 + z * z);
+                    const d0 = vector.sqrt(x0 * x0 + z * z);
+                    const d1 = vector.sqrt(x1 * x1 + z * z);
+                    const d2 = vector.sqrt(x2 * x2 + z * z);
+                    const d3 = vector.sqrt(x3 * x3 + z * z);
 
-                    const y0 = zm.sin(d0 - t);
-                    const y1 = zm.sin(d1 - t);
-                    const y2 = zm.sin(d2 - t);
-                    const y3 = zm.sin(d3 - t);
+                    const y0 = vector.sin(d0 - t);
+                    const y1 = vector.sin(d1 - t);
+                    const y2 = vector.sin(d2 - t);
+                    const y3 = vector.sin(d3 - t);
 
                     std.mem.doNotOptimizeAway(&y0);
                     std.mem.doNotOptimizeAway(&y1);
@@ -435,13 +438,13 @@ noinline fn waveBenchmark(allocator: std.mem.Allocator, comptime count: comptime
     }
 
     {
-        const T = zm.F32x16;
+        const T = core.F32x16;
 
         const static = struct {
             const offsets = [16]f32{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
         };
-        const voffset = zm.load(static.offsets[0..], T, 0);
-        var vt = zm.splat(T, 0.0);
+        const voffset = core.load(static.offsets[0..], T, 0);
+        var vt = core.splat(T, 0.0);
 
         const scale: f32 = 0.05;
 
@@ -453,21 +456,21 @@ noinline fn waveBenchmark(allocator: std.mem.Allocator, comptime count: comptime
             var z_index: i32 = 0;
             while (z_index < grid_size) : (z_index += 1) {
                 const z = scale * @as(f32, @floatFromInt(z_index - grid_size / 2));
-                const vz = zm.splat(T, z);
+                const vz = core.splat(T, z);
 
                 var x_index: i32 = 0;
-                while (x_index < grid_size) : (x_index += zm.veclen(T)) {
+                while (x_index < grid_size) : (x_index += core.veclen(T)) {
                     const x = scale * @as(f32, @floatFromInt(x_index - grid_size / 2));
-                    const vx = zm.splat(T, x) + voffset * zm.splat(T, scale);
+                    const vx = core.splat(T, x) + voffset * core.splat(T, scale);
 
-                    const d = zm.sqrt(vx * vx + vz * vz);
+                    const d = vector.sqrt(vx * vx + vz * vz);
 
-                    const vy = zm.sin(d - vt);
+                    const vy = vector.sin(d - vt);
 
                     std.mem.doNotOptimizeAway(&vy);
                 }
             }
-            vt += zm.splat(T, 0.001);
+            vt += core.splat(T, 0.001);
         }
         const end = timer.read();
         const elapsed_s = @as(f64, @floatFromInt(end - start)) / time.ns_per_s;

@@ -32,7 +32,14 @@ pub fn build(b: *std.Build) void {
 }
 ```
 
-Now in your code you may import and use zmath:
+Now in your code you may import and use zmath. The crate is now organized into modules so you can pull in just what you need:
+
+- `zm.core` – fundamental SIMD types, splats, loads/stores, pointer helpers
+- `zm.vector` – component-wise utilities, vector math, scalar approximations
+- `zm.matrix` – matrix/quaternion helpers, projections, color conversions
+- `zm.fft` – FFT helpers and unity table generation
+
+Most call sites can keep their previous style by creating local aliases, e.g. `const v = zm.vector; const m = zm.matrix;`.
 
 ```zig
 const zm = @import("zmath");
